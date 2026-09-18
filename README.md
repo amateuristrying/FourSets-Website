@@ -27,6 +27,9 @@ The runner is not an image or a keyframed animation. Three layers stack up:
    cycle so it lingers on the two split poses, which is what makes the figure
    legible as a runner at ~20 dots tall. A `amp` parameter blends the whole
    cycle towards a standing pose, which is what drives the Transformations row.
+   The keys describe a bounding sprint — heavy forward lean, long trailing leg,
+   arms opening almost straight through the back of the swing — read off a
+   reference animation frame by frame.
 
 2. **`lib/dotfield/scenes.ts`** — turns a skeleton into tapered capsules in
    canvas space, and describes the surrounding density field. The runner holds

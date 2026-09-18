@@ -4,15 +4,15 @@ import type { LimbList, Scene, SceneContext } from './types';
 
 /** Limb thicknesses in stature units: [start radius, end radius]. */
 const R = {
-  torso: [0.058, 0.076],
+  torso: [0.048, 0.062],
   /* Thin neck: the head has to read as a separate mass above the shoulders. */
-  neck: [0.024, 0.03],
-  head: 0.062,
-  thigh: [0.05, 0.038],
-  shin: [0.038, 0.026],
-  foot: [0.023, 0.014],
-  upper: [0.036, 0.027],
-  fore: [0.027, 0.02],
+  neck: [0.02, 0.026],
+  head: 0.055,
+  thigh: [0.04, 0.03],
+  shin: [0.03, 0.021],
+  foot: [0.02, 0.012],
+  upper: [0.034, 0.026],
+  fore: [0.026, 0.02],
   hand: 0.026,
 } as const;
 
@@ -78,7 +78,7 @@ export interface RunnerSceneOptions {
  * runner reads as travelling through space rather than sliding across a poster.
  */
 export function runnerScene(opts: RunnerSceneOptions = {}): Scene {
-  const cadence = opts.cadence ?? 0.72;
+  const cadence = opts.cadence ?? 0.85;
   const heightRatio = opts.heightRatio ?? 0.82;
   const widthRatio = opts.widthRatio ?? 0.62;
   const narrowWidthRatio = opts.narrowWidthRatio ?? 0.84;
@@ -153,7 +153,7 @@ export function runnerScene(opts: RunnerSceneOptions = {}): Scene {
     },
 
     style: {
-      dilate: 0.26,
+      dilate: 0.22,
       rim: 0.5,
       attack: 0.52,
       advect: 0.55,

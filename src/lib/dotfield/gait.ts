@@ -12,19 +12,21 @@ import { DEG, cyclicSpline, lerp } from './math';
  *
  * Cycle landmarks for the tracked leg:
  *   0.000 foot strike      0.125 mid stance     0.250 toe off
- *   0.375 early swing      0.500 mid swing      0.625 knee drive
- *   0.750 forward reach    0.875 pre-strike
+ *   0.375 trail extended   0.500 heel fold      0.625 knee drive
+ *   0.750 peak drive       0.875 forward reach
  */
-const THIGH = [25, 0, -45, -10, 25, 60, 70, 45];
-const SHIN = [5, -28, -53, -120, -90, -25, 30, 20];
-const FOOT = [105, 82, 25, -40, 0, 70, 120, 105];
+const THIGH = [30, 2, -34, -30, 18, 58, 72, 52];
+const SHIN = [10, -14, -46, -70, -112, -30, 20, 34];
+const FOOT = [102, 86, 22, -10, -30, 60, 110, 112];
 
 /**
  * Arm channels are already phase-opposed to the leg on the same side: at foot
  * strike, when that leg is in front, its arm is at the back of its swing.
+ * The elbow opens almost straight through the back of the swing and folds to
+ * bring the hand up past the chest at the front.
  */
-const UPPER_ARM = [-45, -52, -25, 0, 18, 5, -20, -38];
-const FORE_ARM = [35, 23, 70, 105, 128, 105, 68, 44];
+const UPPER_ARM = [-52, -64, -34, 0, 24, 10, -24, -44];
+const FORE_ARM = [-25, -46, 10, 78, 118, 104, 52, 0];
 
 /** Relaxed standing pose. Stride amplitude blends between this and the cycle. */
 const REST = { thigh: 2, shin: -3, foot: 93, upper: -7, fore: 42 };
@@ -90,8 +92,8 @@ export function runnerJoints(phase: number, amp = 1, out?: Joints): Joints {
   const P = PROPORTIONS;
 
   // Two bounces per stride: lowest at mid stance, highest through flight.
-  const bob = -0.03 * amp * Math.cos(4 * Math.PI * (phase - 0.125));
-  const lean = lerp(3.5, 20 + 2.6 * Math.cos(4 * Math.PI * (phase - 0.05)), amp);
+  const bob = -0.036 * amp * Math.cos(4 * Math.PI * (phase - 0.125));
+  const lean = lerp(3.5, 26 + 6 * Math.cos(4 * Math.PI * (phase - 0.05)), amp);
 
   const hipX = 0.012 * amp * Math.sin(4 * Math.PI * phase);
   const hipY = P.hipHeight + bob;
@@ -195,7 +197,10 @@ function buildSide(
  * split is what makes the figure legible as a runner.
  */
 export function warpPhase(p: number) {
-  return p + 0.055 * Math.sin(4 * Math.PI * p);
+  // 0.07 is just inside the monotonic limit (1/4pi): the cycle nearly holds on
+  // each split and snaps through the passing poses, the way the reference
+  // animation holds a drawn pose and dissolves between them.
+  return p + 0.07 * Math.sin(4 * Math.PI * p);
 }
 
 /** Vertical position of the tracked foot, used to time ground-impact effects. */
