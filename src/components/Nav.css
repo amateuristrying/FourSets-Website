@@ -1,0 +1,213 @@
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  color: var(--ink);
+}
+
+/* A soft ground fade, not a bar: the header should read as part of the page. */
+.nav::before {
+  content: '';
+  position: absolute;
+  /* Extends past the bar so headlines fade out under it instead of colliding. */
+  inset: 0 0 -70px 0;
+  background: linear-gradient(
+    to bottom,
+    var(--ground) 0,
+    rgba(5, 5, 5, 0.96) 46%,
+    rgba(5, 5, 5, 0)
+  );
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-soft);
+  pointer-events: none;
+}
+
+.nav.is-scrolled::before {
+  opacity: 1;
+}
+
+.nav__bar {
+  position: relative;
+  animation: nav-in 1s var(--ease-out) both;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding: clamp(18px, 2.6vh, 34px) var(--gutter);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.nav__logo {
+  display: block;
+  flex: none;
+}
+
+@keyframes nav-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -0.5rem, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav__bar {
+    animation: none;
+  }
+}
+
+.nav__logo .wordmark {
+  width: clamp(104px, 10.4vw, 152px);
+  height: auto;
+  transition: color 0.4s var(--ease-soft);
+}
+
+.nav__logo:hover .wordmark {
+  color: var(--ink-pale);
+}
+
+.nav__links {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(20px, 3.1vw, 52px);
+}
+
+.nav__links a {
+  position: relative;
+  font-size: clamp(0.82rem, 1.02vw, 1rem);
+  font-weight: 500;
+  font-stretch: 104%;
+  letter-spacing: -0.012em;
+  color: var(--ink-55);
+  transition: color 0.35s var(--ease-soft);
+  padding-block: 2px;
+}
+
+.nav__links a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s var(--ease-out);
+}
+
+.nav__links a:hover,
+.nav__links a.is-active {
+  color: var(--ink);
+}
+
+.nav__links a:hover::after,
+.nav__links a.is-active::after {
+  transform: scaleX(1);
+}
+
+/* --------------------------------------------------------- compact header */
+
+.nav__toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink);
+  z-index: 2;
+}
+
+.nav__toggle-mark {
+  display: grid;
+  gap: 4px;
+  width: 20px;
+}
+
+.nav__toggle-mark i {
+  height: 1px;
+  background: currentColor;
+  transition: transform 0.45s var(--ease-out);
+}
+
+.nav.is-open .nav__toggle-mark i:first-child {
+  transform: translateY(2.5px) rotate(45deg);
+}
+
+.nav.is-open .nav__toggle-mark i:last-child {
+  transform: translateY(-2.5px) rotate(-45deg);
+}
+
+.nav__sheet {
+  position: fixed;
+  inset: 0;
+  background: var(--ground);
+  padding: calc(var(--nav-h) + 22vh) var(--gutter) calc(var(--gutter) + 8px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  opacity: 0;
+  visibility: hidden;
+  overflow: hidden;
+  overflow: clip;
+  transform: translate3d(0, -1.2%, 0);
+  transition:
+    opacity 0.5s var(--ease-soft),
+    transform 0.6s var(--ease-out),
+    visibility 0.5s;
+}
+
+.nav.is-open .nav__sheet {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.nav__sheet ul {
+  display: grid;
+  gap: clamp(8px, 1.4vh, 18px);
+}
+
+.nav__sheet a {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7em;
+  font-size: clamp(1.75rem, 8.6vw, 3.4rem);
+  font-weight: 800;
+  font-stretch: 106%;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  opacity: 0;
+  transform: translate3d(0, 0.4em, 0);
+  transition:
+    opacity 0.6s var(--ease-out),
+    transform 0.7s var(--ease-out);
+  transition-delay: calc(var(--i) * 60ms + 90ms);
+}
+
+.nav.is-open .nav__sheet a {
+  opacity: 1;
+  transform: none;
+}
+
+.nav__sheet-index {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  color: var(--ink-38);
+  transform: translateY(-0.9em);
+}
+
+.nav__sheet-foot {
+  color: var(--ink-22);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav__sheet,
+  .nav__sheet a {
+    transition-duration: 0.01ms;
+  }
+}

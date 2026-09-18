@@ -1,0 +1,29 @@
+:root {
+  /* The whole site runs on one ink and one ground. */
+  --ink: #e8ff6b;
+  --ink-rgb: 232, 255, 107;
+  --ink-pale: #f2ffa8;
+  --ground: #050505;
+  --ground-lift: #0a0b08;
+
+  --ink-80: rgba(var(--ink-rgb), 0.8);
+  --ink-55: rgba(var(--ink-rgb), 0.55);
+  --ink-38: rgba(var(--ink-rgb), 0.38);
+  --ink-22: rgba(var(--ink-rgb), 0.22);
+  --hair: rgba(var(--ink-rgb), 0.14);
+  --hair-soft: rgba(var(--ink-rgb), 0.07);
+
+  --font-display: 'Archivo Variable', 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Azeret Mono Variable', 'Azeret Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --gutter: clamp(20px, 4.4vw, 76px);
+  --maxw: 1560px;
+  --nav-h: clamp(56px, 7vh, 82px);
+
+  /* Section rhythm: generous, and it grows with the viewport. */
+  --sp-section: clamp(96px, 15vh, 220px);
+  --sp-block: clamp(40px, 6vh, 96px);
+
+  --ease-out: cubic-bezier(0.16, 0.84, 0.28, 1);
+  --ease-soft: cubic-bezier(0.33, 0.1, 0.2, 1);
+}

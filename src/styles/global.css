@@ -1,0 +1,213 @@
+/* ---------------------------------------------------------------- layout */
+
+.shell {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  position: relative;
+  padding-block: var(--sp-section);
+  /* Anchors must clear the fixed header. */
+  scroll-margin-top: var(--nav-h);
+}
+
+.section--flush {
+  padding-block-end: 0;
+}
+
+.rule {
+  height: 1px;
+  background: var(--hair);
+  width: 100%;
+}
+
+/* ------------------------------------------------------------ typography */
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: clamp(0.6rem, 0.72vw, 0.72rem);
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--ink-55);
+  display: flex;
+  align-items: baseline;
+  gap: 0.9em;
+}
+
+.eyebrow::before {
+  content: '';
+  width: clamp(18px, 3vw, 46px);
+  height: 1px;
+  background: currentColor;
+  transform: translateY(-0.28em);
+  flex: none;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: 108%;
+  line-height: 0.9;
+  letter-spacing: -0.035em;
+  text-transform: none;
+  text-wrap: balance;
+}
+
+.display--xl {
+  font-size: clamp(2.9rem, 7.8vw, 8.2rem);
+}
+
+.display--l {
+  font-size: clamp(2.3rem, 5.4vw, 5.4rem);
+}
+
+.display--m {
+  font-size: clamp(1.5rem, 2.6vw, 2.9rem);
+  line-height: 0.96;
+  letter-spacing: -0.028em;
+}
+
+.display em {
+  font-style: normal;
+  color: var(--ink-38);
+}
+
+@media (max-width: 760px) {
+  .display--xl {
+    font-size: clamp(2.9rem, 12vw, 4.4rem);
+  }
+
+  .display--l {
+    font-size: clamp(2.3rem, 9vw, 3.6rem);
+  }
+}
+
+.body {
+  font-size: clamp(0.95rem, 1.18vw, 1.28rem);
+  line-height: 1.48;
+  color: var(--ink-55);
+  max-width: 40ch;
+  letter-spacing: -0.005em;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: clamp(0.62rem, 0.74vw, 0.76rem);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-38);
+  font-variant-numeric: tabular-nums;
+}
+
+.metric {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* --------------------------------------------------------------- reveals */
+
+/*
+ * One reveal primitive: a mask that lifts. Children opt into a stagger by
+ * setting --i. Everything is transform/opacity only, so it stays cheap.
+ */
+.reveal > .line,
+.reveal.line {
+  display: block;
+  opacity: 0;
+  transform: translate3d(0, 0.62em, 0);
+  transition:
+    opacity 0.9s var(--ease-out),
+    transform 1.1s var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 85ms + var(--delay, 0ms));
+  will-change: opacity, transform;
+}
+
+.reveal.is-in > .line,
+.reveal.is-in.line {
+  opacity: 1;
+  transform: none;
+}
+
+.mask-line {
+  display: block;
+  overflow: hidden;
+  padding-block-end: 0.04em;
+}
+
+.reveal > .fade,
+.reveal .fade {
+  opacity: 0;
+  transition: opacity 1.1s var(--ease-soft);
+  transition-delay: calc(var(--i, 0) * 85ms + var(--delay, 0ms));
+}
+
+.reveal.is-in > .fade,
+.reveal.is-in .fade {
+  opacity: 1;
+}
+
+.reveal .wipe {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.2s var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 85ms + var(--delay, 0ms));
+}
+
+.reveal.is-in .wipe {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal > .line,
+  .reveal.line,
+  .reveal .fade,
+  .reveal .wipe {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ----------------------------------------------------------------- links */
+
+.link {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.6em;
+  color: var(--ink);
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.18em;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s var(--ease-out);
+}
+
+.link:hover::after,
+.link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
