@@ -22,14 +22,20 @@ const FOOT = [102, 86, 22, -10, -30, 60, 110, 112];
 /**
  * Arm channels are already phase-opposed to the leg on the same side: at foot
  * strike, when that leg is in front, its arm is at the back of its swing.
- * The elbow opens almost straight through the back of the swing and folds to
- * bring the hand up past the chest at the front.
+ *
+ * The elbow holds roughly 80-115 degrees the whole way round while the upper
+ * arm swings wide, so each arm reads as an open hook clear of the torso: at the
+ * back the upper arm reaches near horizontal with the forearm dropping
+ * vertically, at the front it folds to carry the hand up past the chest.
+ *
+ * The swing peaks where the legs do (phases 0.25 and 0.75), so at the two poses
+ * the cycle dwells on, both arms are at full extension rather than tucked.
  */
-const UPPER_ARM = [-52, -64, -34, 0, 24, 10, -24, -44];
-const FORE_ARM = [-25, -46, 10, 78, 118, 104, 52, 0];
+const UPPER_ARM = [-29, -5, 20, 2, -29, -60, -78, -58];
+const FORE_ARM = [71, 103, 134, 110, 69, 28, 2, 30];
 
 /** Relaxed standing pose. Stride amplitude blends between this and the cycle. */
-const REST = { thigh: 2, shin: -3, foot: 93, upper: -7, fore: 42 };
+const REST = { thigh: 2, shin: -3, foot: 93, upper: -12, fore: 62 };
 
 export interface Joints {
   hipX: number;
@@ -70,15 +76,15 @@ export const PROPORTIONS = {
   torso: 0.285,
   neck: 0.052,
   headR: 0.057,
-  upperArm: 0.155,
-  foreArm: 0.15,
+  upperArm: 0.175,
+  foreArm: 0.165,
   hand: 0.05,
   thigh: 0.245,
   shin: 0.235,
   foot: 0.1,
   hipHeight: 0.52,
   /** Lateral offset between the near and far limb pairs (three-quarter view). */
-  sideOffset: 0.016,
+  sideOffset: 0.022,
 };
 
 const dirX = (deg: number) => Math.sin(deg * DEG);

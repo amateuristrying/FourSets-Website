@@ -199,8 +199,9 @@ export class DotField {
         let target = 0;
         if (best < band) {
           target = best <= dilate ? 1 : smoothstep(band, dilate, best) * 0.46;
-          // Far-side limbs charge less, so the figure reads with depth.
-          target *= 0.62 + 0.38 * depth;
+          // Far-side limbs charge less, so the figure reads with depth — but
+          // enough to stay legible, since both arms carry the running pose.
+          target *= 0.76 + 0.24 * depth;
         }
         if (boost) {
           const extra = boost(x, y, sc);

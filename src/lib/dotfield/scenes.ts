@@ -13,7 +13,7 @@ const R = {
   foot: [0.02, 0.012],
   upper: [0.034, 0.026],
   fore: [0.026, 0.02],
-  hand: 0.026,
+  hand: 0.029,
 } as const;
 
 /** Emits one skeleton into the limb buffer, mapped from stature units to canvas. */
