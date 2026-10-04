@@ -1,8 +1,8 @@
 # FourSets
 
 A responsive brand site for a fictional movement-training product, built around a
-dot-matrix runner that is generated rather than drawn: a skeletal running cycle
-is sampled onto a fixed lattice of circles every frame.
+particle runner sampled from the supplied running reference, rendered in lime
+on a fine canvas grid. The original procedural engine powers the other sections.
 
 Black ground, one chartreuse ink, geometric type, and a lot of negative space.
 
@@ -14,41 +14,32 @@ npm run dev
 ```
 
 `npm run build` type-checks and emits a production bundle to `dist/`.
+`npm test` checks the sampled animation data, source timing and decoder failures.
 
 ## How the hero works
 
-The runner is not an image or a keyframed animation. Three layers stack up:
+`HeroRunner.tsx` plays the 24-frame, 720 ms stride from `reference/run.gif` as
+fine lime particles. It preserves the reference's bent-knee recovery, opposing
+arm swing, flight phases and point-cloud texture. Near-empty alternating frames
+are blended with their neighbours to prevent flicker. A fixed sampling grid keeps
+individual dots stable while the silhouette moves through them.
 
-1. **`lib/dotfield/gait.ts`** — an art-directed running cycle. Every channel
-   (thigh, shin, foot, upper arm, forearm) is an absolute segment angle measured
-   from the downward vertical, stored as eight keys per stride and read back
-   through a periodic Catmull-Rom spline. Absolute angles keep knee and elbow
-   bends anatomically valid while staying tunable by eye. `warpPhase` eases the
-   cycle so it lingers on the two split poses, which is what makes the figure
-   legible as a runner at ~20 dots tall. A `amp` parameter blends the whole
-   cycle towards a standing pose, which is what drives the Transformations row.
-   The keys describe a bounding sprint — heavy forward lean, long trailing leg,
-   arms opening almost straight through the back of the swing — read off a
-   reference animation frame by frame.
+- `scripts/sample-runner.py` samples the original GIF into a 144 × 144 luminance
+  grid per frame and packs empty space into zero runs. Regenerate with
+  `python3 scripts/sample-runner.py` (requires Pillow).
+- `src/assets/runner.bin` is the generated ~118 KB animation data;
+  `runner.json` records dimensions, frame durations and the still poster frame.
+  The original GIF is a development reference and is not shipped in the bundle.
+- `lib/referenceRunner.ts` validates and decodes the data, maps elapsed time to
+  source frames and draws circles in twelve opacity batches. It repaints only
+  when the source frame changes, with display resolution capped at 2×.
+- The canvas resizes without resetting the stride, stops requesting animation
+  frames offscreen or in a hidden tab, and shows one still pose for Reduce
+  Motion. The procedural runner remains a fallback if the asset cannot load.
 
-2. **`lib/dotfield/scenes.ts`** — turns a skeleton into tapered capsules in
-   canvas space, and describes the surrounding density field. The runner holds
-   position while the field's noise streams leftward, so the figure reads as
-   travelling through space rather than sliding across a poster.
-
-3. **`lib/dotfield/engine.ts`** — the renderer. Each lattice cell samples the
-   signed distance to the scene's shapes (`sdf.ts`), charges quickly when the
-   body covers it and discharges slowly, so movement leaves a wake of dots that
-   decay back into outline circles. Energy is also advected against the
-   direction of travel, smearing that wake behind the runner. Shapes are dilated
-   by a fraction of the lattice pitch before sampling — without that, a limb
-   thinner than the pitch can slip between cells and vanish.
-
-Dots are batched into a dozen alpha buckets and filled as two `Path2D` passes
-per frame, which keeps the hero field at roughly 0.4 ms/frame for ~1800 cells.
-
-The same engine serves the Mission lattice (a scan bar crossing a quiet grid),
-the editorial washes, and the Transformations progression.
+The original `lib/dotfield/` engine still serves the Mission lattice, editorial
+washes and Transformations progression, with its own skeletal gait and density
+fields. These sections retain their existing appearance.
 
 ## Notes
 

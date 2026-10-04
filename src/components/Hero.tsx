@@ -1,11 +1,7 @@
-import DotCanvas from './DotCanvas';
+import HeroRunner from './HeroRunner';
 import Wordmark from './Wordmark';
-import { runnerScene } from '../lib/dotfield/scenes';
 import { useReveal } from '../lib/hooks';
 import './Hero.css';
-
-/** Module scope keeps the factory identity stable across renders. */
-const scene = () => runnerScene();
 
 export default function Hero() {
   const { ref, className } = useReveal(0.02);
@@ -14,11 +10,7 @@ export default function Hero() {
     <section id="top" className="hero" ref={ref}>
       <div className={`hero__grid ${className}`}>
         <div className="hero__field">
-          <DotCanvas
-            scene={scene}
-            fade
-            label="A runner mid-stride, drawn as a field of circular dots that assemble around the moving body."
-          />
+          <HeroRunner />
         </div>
 
         <h1 className="hero__mark fade" style={{ '--delay': '260ms' } as React.CSSProperties}>
