@@ -37,9 +37,22 @@ individual dots stable while the silhouette moves through them.
   frames offscreen or in a hidden tab, and shows one still pose for Reduce
   Motion. The procedural runner remains a fallback if the asset cannot load.
 
-The original `lib/dotfield/` engine still serves the Mission lattice, editorial
-washes and Transformations progression, with its own skeletal gait and density
-fields. These sections retain their existing appearance.
+## Transformations circle runners
+
+The Transformations row samples the same reference into the original lattice of
+filled and outlined circles. `runnerSilhouettes` averages the small particles
+into body coverage once at load time; bilinear spatial sampling and interpolation
+between reference frames keep the coarse circles coherent as the runner moves.
+
+W01 holds a stance; W12 and W24 follow the reference at increasing cadence. The
+stride is independent of scroll position, so entering the section no longer
+compresses the running figures into nearly upright poses. Short dot decay keeps
+arms and bent knees distinct. Phones show the W24 runner; wider screens show all
+three figures, with matching week-label breakpoints. Reduce Motion uses a held
+frame, and the procedural circle runners are the asset-load fallback.
+
+The hero retains its fine-particle treatment. The Mission lattice and editorial
+washes continue to use the original procedural engine.
 
 ## Notes
 

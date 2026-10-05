@@ -1,7 +1,10 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import DotCanvas from './DotCanvas';
 import { progressionScene } from '../lib/dotfield/scenes';
 import { useMedia, useReveal } from '../lib/hooks';
+import { decodeRunner, runnerSilhouettes } from '../lib/referenceRunner';
+
+const runnerSource = new URL('../assets/runner.bin', import.meta.url).href;
 
 const STAGES = [
   { week: 'W01', stride: '1.02', cadence: '148', output: '212' },
@@ -18,11 +21,29 @@ const ROWS = [
 export default function Transformations() {
   const { ref, className } = useReveal(0.12);
   const solo = useMedia('(max-width: 760px)');
+  const [silhouettes, setSilhouettes] = useState<Float32Array>();
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(runnerSource, { signal: controller.signal })
+      .then(response => {
+        if (!response.ok) throw new Error('Runner reference unavailable');
+        return response.arrayBuffer();
+      })
+      .then(buffer => {
+        if (!controller.signal.aborted) {
+          setSilhouettes(runnerSilhouettes(decodeRunner(new Uint8Array(buffer))));
+        }
+      })
+      // The procedural circle runners remain visible if the asset cannot load.
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
 
   // One figure on phones, the full progression on wider screens.
   const scene = useMemo(
-    () => () => progressionScene(solo ? { stages: [1] } : {}),
-    [solo],
+    () => () => progressionScene({ stages: solo ? [1] : undefined, silhouettes }),
+    [solo, silhouettes],
   );
 
   return (
@@ -52,7 +73,9 @@ export default function Transformations() {
           <DotCanvas
             key={solo ? 'solo' : 'row'}
             scene={scene}
-            label="Three dot-matrix figures progressing from a held stance to a full running stride."
+            label={solo
+              ? 'A running figure formed from filled lime circles surrounded by outlined circles.'
+              : 'Three circle-matrix athletes: a held stance, a controlled run and a faster stride.'}
           />
           <div className="tf__marks" aria-hidden="true">
             {(solo ? STAGES.slice(-1) : STAGES).map((s) => (

@@ -1,6 +1,7 @@
 import { clamp, smoothstep, valueNoise } from './math';
 import { runnerJoints, strikePhase, warpPhase, type Joints } from './gait';
 import type { LimbList, Scene, SceneContext } from './types';
+import { runnerPose, sampleRunnerFrame } from '../referenceRunner';
 
 /** Limb thicknesses in stature units: [start radius, end radius]. */
 const R = {
@@ -171,37 +172,57 @@ export function runnerScene(opts: RunnerSceneOptions = {}): Scene {
 export interface ProgressionSceneOptions {
   /** Stride amplitude for each figure, left to right. */
   stages?: number[];
+  /** Smoothed reference silhouettes, sampled into the existing circle lattice. */
+  silhouettes?: Float32Array;
 }
 
 /**
- * Transformations: the same skeleton at rising stride amplitude and cadence.
- * Scroll progress drives the whole row from held stillness into full flight.
+ * Transformations: circle-matrix athletes at increasing cadence.
+ * Movement stays legible at every scroll position. Reference silhouettes drive
+ * the moving figures while the original skeleton supplies the held stance.
  */
 export function progressionScene(opts: ProgressionSceneOptions = {}): Scene {
   const stages = opts.stages ?? [0.08, 0.52, 1];
   const phases = stages.map((_, i) => 0.25 + i * 0.25);
   const joints = stages.map(() => runnerJoints(0));
+  const poses = stages.map(() => runnerPose(0));
 
-  const stature = (w: number, h: number) => Math.min(h * 0.68, (w / stages.length) * 0.62);
+  const stature = (w: number, h: number) => Math.min(h * 0.88, (w / stages.length) * 1.15);
 
   return {
-    spacing(w) {
-      return clamp(w / 78, 11, 18);
+    spacing(w, h) {
+      return clamp(stature(w, h) / 30, 6, 17);
     },
 
     build(out, ctx) {
       const S = stature(ctx.w, ctx.h);
       const slot = ctx.w / stages.length;
-      const drive = 0.25 + 0.75 * smoothstep(0.05, 0.75, ctx.progress);
-
       for (let i = 0; i < stages.length; i++) {
-        const amp = stages[i] * drive;
-        phases[i] += ctx.dt * (0.2 + stages[i] * 0.72) * drive;
+        const held = stages[i] < 0.1;
+        poses[i] = runnerPose(ctx.t * 1000 * (0.65 + stages[i] * 0.4) + i * 180);
+        if (opts.silhouettes && !held) continue;
+        const amp = held ? 0 : stages[i];
+        phases[i] += ctx.dt * (0.65 + stages[i] * 0.4);
         if (phases[i] > 1) phases[i] -= Math.floor(phases[i]);
         runnerJoints(warpPhase(phases[i]), amp, joints[i]);
         const cx = slot * (i + 0.5);
-        emitFigure(out, joints[i], cx, ctx.h * 0.5 + S * 0.46, S, 0.8);
+        const top = (ctx.h - S) / 2 + 10;
+        emitFigure(out, joints[i], cx, top + S * 0.96, S * 0.84, 0.8);
       }
+    },
+
+    energy(x, y, ctx) {
+      if (!opts.silhouettes) return 0;
+      const slot = ctx.w / stages.length;
+      const i = Math.floor(x / slot);
+      if (i < 0 || i >= stages.length || stages[i] < 0.1) return 0;
+      const S = stature(ctx.w, ctx.h);
+      const u = (x - slot * (i + 0.5)) / S + 0.5;
+      const v = (y - (ctx.h - S) / 2 - 10) / S;
+      const pose = poses[i];
+      const a = sampleRunnerFrame(opts.silhouettes, pose.frame, u, v);
+      const b = sampleRunnerFrame(opts.silhouettes, pose.next, u, v);
+      return a + (b - a) * pose.blend;
     },
 
     mask(gx, gy, nx, ny, seed, ctx) {
@@ -216,11 +237,12 @@ export function progressionScene(opts: ProgressionSceneOptions = {}): Scene {
     style: {
       dilate: 0.28,
       rim: 0.5,
-      advect: 0.58,
-      decay: 0.085,
-      outlineAlpha: 0.3,
-      fillMax: 0.42,
-      fillMin: 0.14,
+      attack: 0.8,
+      advect: 0.12,
+      decay: 0.34,
+      outlineAlpha: 0.26,
+      fillMax: 0.45,
+      fillMin: 0.18,
       outlineR: 0.4,
       sparkle: 0.03,
       drift: 0.03,

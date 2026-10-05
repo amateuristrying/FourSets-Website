@@ -35,6 +35,66 @@ export function frameAt(elapsed: number): number {
   return 0;
 }
 
+/** Recover a continuous silhouette from the reference's fine particle texture.
+ * An integral image averages small neighbourhoods once at load time. The circle
+ * renderer can then sample the body at any lattice pitch without losing limbs.
+ */
+export function runnerSilhouettes(frames: Uint8Array): Float32Array {
+  if (frames.length !== FRAME_SAMPLES * metadata.durations.length) {
+    throw new Error('Invalid runner silhouette data');
+  }
+  const result = new Float32Array(frames.length);
+  const stride = RUN_SIZE + 1;
+  const sums = new Float32Array(stride * stride);
+  for (let frame = 0; frame < metadata.durations.length; frame++) {
+    const offset = frame * FRAME_SAMPLES;
+    sums.fill(0);
+    for (let y = 0; y < RUN_SIZE; y++) {
+      let row = 0;
+      for (let x = 0; x < RUN_SIZE; x++) {
+        row += frames[offset + y * RUN_SIZE + x];
+        sums[(y + 1) * stride + x + 1] = sums[y * stride + x + 1] + row;
+      }
+    }
+    for (let y = 0; y < RUN_SIZE; y++) {
+      for (let x = 0; x < RUN_SIZE; x++) {
+        const x0 = Math.max(0, x - 3), x1 = Math.min(RUN_SIZE, x + 4);
+        const y0 = Math.max(0, y - 3), y1 = Math.min(RUN_SIZE, y + 4);
+        const total = sums[y1 * stride + x1] - sums[y0 * stride + x1]
+          - sums[y1 * stride + x0] + sums[y0 * stride + x0];
+        const density = total / ((x1 - x0) * (y1 - y0));
+        const t = Math.max(0, Math.min(1, (density - 4) / 22));
+        result[offset + y * RUN_SIZE + x] = t * t * (3 - 2 * t);
+      }
+    }
+  }
+  return result;
+}
+
+/** Bilinear sampling keeps the shape stable as the viewport/grid changes. */
+export function sampleRunnerFrame(fields: Float32Array, frame: number, u: number, v: number): number {
+  if (u < 0 || v < 0 || u > 1 || v > 1) return 0;
+  const x = u * (RUN_SIZE - 1), y = v * (RUN_SIZE - 1);
+  const x0 = Math.floor(x), y0 = Math.floor(y);
+  const x1 = Math.min(RUN_SIZE - 1, x0 + 1), y1 = Math.min(RUN_SIZE - 1, y0 + 1);
+  const offset = frame * FRAME_SAMPLES;
+  const top = fields[offset + y0 * RUN_SIZE + x0] * (1 - (x - x0))
+    + fields[offset + y0 * RUN_SIZE + x1] * (x - x0);
+  const bottom = fields[offset + y1 * RUN_SIZE + x0] * (1 - (x - x0))
+    + fields[offset + y1 * RUN_SIZE + x1] * (x - x0);
+  return top * (1 - (y - y0)) + bottom * (y - y0);
+}
+
+/** Smooth the reference frames while retaining their original timing. */
+export function runnerPose(elapsed: number) {
+  const time = ((elapsed % LOOP_MS) + LOOP_MS) % LOOP_MS;
+  const frame = frameAt(time);
+  let start = 0;
+  for (let i = 0; i < frame; i++) start += metadata.durations[i];
+  return { frame, next: (frame + 1) % metadata.durations.length,
+    blend: (time - start) / metadata.durations[frame] };
+}
+
 /** Draw the actual reference silhouette on a fine grid of lime particles. */
 export function drawRunner(
   ctx: CanvasRenderingContext2D,

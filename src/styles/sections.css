@@ -230,7 +230,7 @@
   position: relative;
   height: clamp(280px, 44vh, 520px);
   /* The figures dissolve into the page rather than stopping at a canvas edge. */
-  mask-image: linear-gradient(to bottom, #000 0 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0 94%, transparent 100%);
 }
 
 .tf__marks {
@@ -327,6 +327,9 @@
   .tf__data {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 760px) {
   .tf__marks {
     grid-template-columns: 1fr;
   }
