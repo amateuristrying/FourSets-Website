@@ -102,12 +102,13 @@ export function drawRunner(
   frame: number,
   width: number,
   height: number,
+  placement?: { size: number; left: number; top: number },
 ) {
   ctx.clearRect(0, 0, width, height);
-  const size = Math.min(height * .98, width * .98);
+  const size = placement?.size ?? Math.min(height * .98, width * .98);
   const pitch = size / RUN_SIZE;
-  const left = (width - size) / 2;
-  const top = (height - size) / 2;
+  const left = placement?.left ?? (width - size) / 2;
+  const top = placement?.top ?? (height - size) / 2;
   const buckets = Array.from({ length: 12 }, () => new Path2D());
   const offset = frame * FRAME_SAMPLES;
 

@@ -4,21 +4,25 @@ import { useReducedMotion } from '../lib/hooks';
 import { nearViewport, onScroll } from '../lib/scroll';
 import { runnerScene } from '../lib/dotfield/scenes';
 import DotCanvas from './DotCanvas';
+import { drawLandscape, landscapeLayout } from '../lib/runnerLandscape';
 
 const source = new URL('../assets/runner.bin', import.meta.url).href;
 const fallback = () => runnerScene();
-const label = 'A runner in continuous stride, formed from fine lime particles.';
+const label = 'A lime-particle runner running endlessly above scrolling ground, with pixel-outline clouds drifting through a black sky.';
 
 export default function HeroRunner() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const landscapeRef = useRef<HTMLCanvasElement>(null);
   const reduced = useReducedMotion();
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || failed) return;
+    const landscape = landscapeRef.current;
+    if (!canvas || !landscape || failed) return;
     const ctx = canvas.getContext('2d');
-    if (!ctx) {
+    const landscapeCtx = landscape.getContext('2d');
+    if (!ctx || !landscapeCtx) {
       setFailed(true);
       return;
     }
@@ -34,11 +38,12 @@ export default function HeroRunner() {
     let lastFrame = -1;
 
     const draw = (force = false) => {
+      drawLandscape(landscapeCtx, width, height, reduced ? 0 : elapsed / 1000);
       if (!frames) return;
       const frame = reduced ? POSTER_FRAME : frameAt(elapsed);
       if (!force && frame === lastFrame) return;
       lastFrame = frame;
-      drawRunner(ctx, frames, frame, width, height);
+      drawRunner(ctx, frames, frame, width, height, landscapeLayout(width, height));
     };
     const tick = (now: number) => {
       elapsed += Math.min(now - lastTime, 100);
@@ -64,6 +69,9 @@ export default function HeroRunner() {
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      landscape.width = canvas.width;
+      landscape.height = canvas.height;
+      landscapeCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
       draw(true);
       visible = nearViewport(canvas, 0);
       syncPlayback();
@@ -104,6 +112,7 @@ export default function HeroRunner() {
 
   if (failed) return <DotCanvas scene={fallback} label={label} />;
   return <>
+    <canvas ref={landscapeRef} className="dotcanvas" aria-hidden="true" />
     <canvas ref={canvasRef} className="dotcanvas" aria-hidden="true" />
     <span className="vh">{label}</span>
   </>;

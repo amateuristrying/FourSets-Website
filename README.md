@@ -31,11 +31,24 @@ individual dots stable while the silhouette moves through them.
   `runner.json` records dimensions, frame durations and the still poster frame.
   The original GIF is a development reference and is not shipped in the bundle.
 - `lib/referenceRunner.ts` validates and decodes the data, maps elapsed time to
-  source frames and draws circles in twelve opacity batches. It repaints only
-  when the source frame changes, with display resolution capped at 2×.
+  source frames and draws circles in twelve opacity batches. The runner layer
+  repaints only when the source frame changes, with display resolution capped at 2×.
 - The canvas resizes without resetting the stride, stops requesting animation
   frames offscreen or in a hidden tab, and shows one still pose for Reduce
   Motion. The procedural runner remains a fallback if the asset cannot load.
+
+## Endless-running landscape
+
+`lib/runnerLandscape.ts` adds the reference-inspired black sky, stepped lime
+cloud outlines, a level ground line and tiny terrain dashes. A shared layout
+anchors the runner's source-frame floor to the horizon, including on phones.
+Terrain moves left quickly while differently sized clouds drift more slowly.
+Both wrap outside the visible area; the terrain tile repeats without a seam.
+
+A second canvas lets the scenery move at the display frame rate while the runner
+retains its source-frame cadence. Both use the same paused clock, stop offscreen
+or in hidden tabs, and freeze together when Reduce Motion is enabled. Mobile
+uses two clouds to leave more negative space around the athlete.
 
 ## Transformations circle runners
 
