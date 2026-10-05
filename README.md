@@ -50,22 +50,29 @@ retains its source-frame cadence. Both use the same paused clock, stop offscreen
 or in hidden tabs, and freeze together when Reduce Motion is enabled. Mobile
 uses two clouds to leave more negative space around the athlete.
 
-## Transformations circle runners
+## Transformations exercise loops
 
-The Transformations row samples the same reference into the original lattice of
-filled and outlined circles. `runnerSilhouettes` averages the small particles
-into body coverage once at load time; bilinear spatial sampling and interpolation
-between reference frames keep the coarse circles coherent as the runner moves.
+The W01, W12 and W24 panels now show a push-up, seated dumbbell press and pull-up,
+respectively. Their poses come from `reference/motion.gif`, with its full 4.74 s
+loop and relative exercise timing preserved. Lime circles trace each athlete,
+clothing interiors stay dim, and a faint outlined-circle field sits behind them.
+A shared dotted floor and a fixed pull-up bar keep the equipment grounded.
 
-W01 holds a stance; W12 and W24 follow the reference at increasing cadence. The
-stride is independent of scroll position, so entering the section no longer
-compresses the running figures into nearly upright poses. Short dot decay keeps
-arms and bent knees distinct. Phones show the W24 runner; wider screens show all
-three figures, with matching week-label breakpoints. Reduce Motion uses a held
-frame, and the procedural circle runners are the asset-load fallback.
+- Regenerate with `python3 scripts/sample-exercises.py` (requires Pillow). It
+  isolates the three athletes, removes the source background and shadows, and
+  retains 79 poses per exercise at 60 ms intervals.
+- `exercises.bin` contains ~545 KB of run-length encoded coverage; the 4 MB source
+  GIF is a development reference and is not included in the website bundle.
+- `lib/referenceExercises.ts` validates the data and interpolates the poses;
+  `lib/dotfield/exercises.ts` samples them onto the existing circle renderer.
+- Inline poster poses keep all three figures visible while loading or if the
+  asset fails. Reduce Motion skips the animation download and shows stills.
+- Desktop uses one row with a continuous dotted floor. Phones stack all three
+  exercises, keeping each movement legible. Repetitions are independent of scroll;
+  offscreen fields pause their animation clocks.
 
-The hero retains its fine-particle treatment. The Mission lattice and editorial
-washes continue to use the original procedural engine.
+The hero retains its fine-particle runner and moving landscape. The Mission
+lattice and editorial washes continue to use the original procedural engine.
 
 ## Notes
 

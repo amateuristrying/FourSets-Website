@@ -1,10 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import DotCanvas from './DotCanvas';
-import { progressionScene } from '../lib/dotfield/scenes';
-import { useMedia, useReveal } from '../lib/hooks';
-import { decodeRunner, runnerSilhouettes } from '../lib/referenceRunner';
+import { exerciseScene } from '../lib/dotfield/exercises';
+import { useReducedMotion, useReveal } from '../lib/hooks';
+import { decodeExercises } from '../lib/referenceExercises';
 
-const runnerSource = new URL('../assets/runner.bin', import.meta.url).href;
+const motionSource = new URL('../assets/exercises.bin', import.meta.url).href;
+const EXERCISES = [
+  { index: 0, name: 'Push-up', description: 'A circle-matrix athlete lowers into a push-up, then presses back to a plank.' },
+  { index: 1, name: 'Seated press', description: 'A seated circle-matrix athlete raises and lowers two dumbbells overhead.' },
+  { index: 2, name: 'Pull-up', description: 'A circle-matrix athlete lifts and lowers their body beneath a fixed pull-up bar.' },
+] as const;
 
 const STAGES = [
   { week: 'W01', stride: '1.02', cadence: '148', output: '212' },
@@ -20,30 +25,30 @@ const ROWS = [
 
 export default function Transformations() {
   const { ref, className } = useReveal(0.12);
-  const solo = useMedia('(max-width: 760px)');
-  const [silhouettes, setSilhouettes] = useState<Float32Array>();
+  const reduced = useReducedMotion();
+  const [fields, setFields] = useState<Uint8Array>();
 
   useEffect(() => {
+    if (reduced) return;
     const controller = new AbortController();
-    fetch(runnerSource, { signal: controller.signal })
+    fetch(motionSource, { signal: controller.signal })
       .then(response => {
-        if (!response.ok) throw new Error('Runner reference unavailable');
+        if (!response.ok) throw new Error('Exercise reference unavailable');
         return response.arrayBuffer();
       })
       .then(buffer => {
         if (!controller.signal.aborted) {
-          setSilhouettes(runnerSilhouettes(decodeRunner(new Uint8Array(buffer))));
+          setFields(decodeExercises(new Uint8Array(buffer)));
         }
       })
-      // The procedural circle runners remain visible if the asset cannot load.
+      // Inline circle poses remain visible during loading or a failed request.
       .catch(() => {});
     return () => controller.abort();
-  }, []);
+  }, [reduced]);
 
-  // One figure on phones, the full progression on wider screens.
-  const scene = useMemo(
-    () => () => progressionScene({ stages: solo ? [1] : undefined, silhouettes }),
-    [solo, silhouettes],
+  const scenes = useMemo(
+    () => EXERCISES.map(({ index }) => () => exerciseScene(index, fields)),
+    [fields],
   );
 
   return (
@@ -64,26 +69,22 @@ export default function Transformations() {
             </span>
           </h2>
           <p className="body tf__lede line" style={{ '--i': 3 } as React.CSSProperties}>
-            The same athlete, twenty-four weeks apart. Held still, then driving. What changes is not
-            the shape — it is the output.
+            Progress, one repetition at a time. Push, press, pull. Twenty-four weeks of showing up,
+            measured in what you can do.
           </p>
         </div>
 
-        <div className="tf__stage fade" style={{ '--i': 4 } as React.CSSProperties}>
-          <DotCanvas
-            key={solo ? 'solo' : 'row'}
-            scene={scene}
-            label={solo
-              ? 'A running figure formed from filled lime circles surrounded by outlined circles.'
-              : 'Three circle-matrix athletes: a held stance, a controlled run and a faster stride.'}
-          />
-          <div className="tf__marks" aria-hidden="true">
-            {(solo ? STAGES.slice(-1) : STAGES).map((s) => (
-              <span className="mono" key={s.week}>
-                {s.week}
-              </span>
-            ))}
-          </div>
+        <div className="tf__exercises fade" style={{ '--i': 4 } as React.CSSProperties}>
+          {EXERCISES.map((exercise, index) => (
+            <figure className="tf__exercise" key={exercise.name}>
+              <figcaption className="mono tf__mark">
+                {STAGES[index].week}<span className="vh"> — {exercise.name}</span>
+              </figcaption>
+              <div className="tf__stage">
+                <DotCanvas scene={scenes[index]} label={exercise.description} />
+              </div>
+            </figure>
+          ))}
         </div>
 
         <div className="tf__data">

@@ -226,25 +226,25 @@
   max-width: 38ch;
 }
 
+.tf__exercises {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-block-start: 1px solid var(--hair);
+}
+
+.tf__mark {
+  display: block;
+  padding-block: 12px 8px;
+  text-align: center;
+  color: var(--ink-55);
+}
+
 .tf__stage {
   position: relative;
-  height: clamp(280px, 44vh, 520px);
-  /* The figures dissolve into the page rather than stopping at a canvas edge. */
-  mask-image: linear-gradient(to bottom, #000 0 94%, transparent 100%);
-}
-
-.tf__marks {
-  position: absolute;
-  inset: 0 0 auto 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  border-block-start: 1px solid var(--hair);
-  padding-block-start: 10px;
-}
-
-.tf__marks .mono {
-  text-align: center;
-  color: var(--ink-38);
+  width: 100%;
+  aspect-ratio: 9 / 8;
+  /* Keep the dotted floor visible as the surrounding ring field dissolves. */
+  mask-image: linear-gradient(to bottom, #000 0 97%, transparent 100%);
 }
 
 .tf__data {
@@ -329,12 +329,20 @@
   }
 }
 
-@media (max-width: 760px) {
-  .tf__marks {
+@media (max-width: 600px) {
+  .tf__exercises {
     grid-template-columns: 1fr;
+    gap: 28px;
   }
-  .tf__marks .mono {
+  .tf__exercise + .tf__exercise {
+    border-block-start: 1px solid var(--hair);
+  }
+  .tf__mark {
     text-align: left;
+  }
+  .tf__stage {
+    max-width: 440px;
+    margin-inline: auto;
   }
 }
 
